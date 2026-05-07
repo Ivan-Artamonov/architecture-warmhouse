@@ -123,19 +123,18 @@
 
 **Диаграмма контейнеров (Containers)**
 
-Добавьте диаграмму.
+[Посмотреть диаграмму](img/container_c4-WarmHouse_Container_Diagram.png)
 
 **Диаграмма компонентов (Components)**
 
 Диаграмма компонентов для контейнера Payments.
 Предполагается, что авторизацию запроса уже провел APIGateway
 
-
-
+[Посмотреть диаграмму](img/component_c4-WarmHouse_Payments_Component_Diagram.png)
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+[Посмотреть диаграмму](img/sequence_payment_processing.png)
 
 # Задание 3. Разработка ER-диаграммы
 

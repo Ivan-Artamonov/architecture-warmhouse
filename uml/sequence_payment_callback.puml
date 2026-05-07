@@ -1,0 +1,33 @@
+@startuml
+actor "Пользователь" as user
+participant "API биллинга" as billing
+participant "Платежная система" as bank
+participant "Callback API" as api
+database "База данных" as db
+queue "Очередь на отправку смс" as sms
+queue "Очередь на печать чеков" as receipts
+
+
+user -> billing: Запросить платежное окно
+billing -> db: Сохранить идентификатор платежа
+billing -> user: URL
+user -> bank: GET https://url
+bank -> user: HTML + JS
+user -> bank: payment data
+bank -> bank: Платежная магия
+
+bank -> api: Уведомление о статусе операции
+    api -> db: Найти идентификатор платежа
+alt "Оплата успешна"
+    api -> db: Сохранить информацию о платеже
+    api -> db: Поставить задачу на пересчет задолженности
+    api -> sms: Отправить уведомление пользователю
+    api -> receipts: Напечатать чек
+
+else "Оплата не удалась"
+    api -> db: Пометить платеж неудачным
+end
+
+api -> bank: 200 OK
+
+@enduml
