@@ -1,22 +1,27 @@
 @startuml
+!RELATIVE_INCLUDE = 1
+!include ./C4_Context.puml
+
 title WarmHouse Context Diagram
 
 top to bottom direction
-
-!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
 Person(user, "Пользователь", "Владелец или жилец дома, подлюченного к системе")
 Person(admin, "Администратор", "Работники Теплого дома с разными правами доступа")
 System(WarmHouse, "Теплый дом", "Экосистема умных поселков")
 
+System_Ext(devices, "Устройства", "Подключенные устройства")
 System_Ext(api, "API разработчиков устройств", "API, которое используют устройства")
 System_Ext(bank, "Платежная система", "Внешняя платежная система для работы биллинга")
 System_Ext(weather, "API погоды", "Погода, длительность дня и пр. информация")
+System_Ext(sms, "API уведомлений", "SMS, push-уведомления")
 
-Rel(user, WarmHouse, "Uses the system")
-Rel(admin,WarmHouse,"Manages the system")
-Rel(WarmHouse,api,"Fetches devices' data")
-Rel(WarmHouse,bank,"Processes payments")
+Rel(user, WarmHouse, "Управляет своим домом")
+Rel(admin,WarmHouse,"Управляет всей системой")
+Rel(devices,WarmHouse,"Взаимодйствуют с API системы")
+Rel(WarmHouse,api,"API для работы приложений и устройств")
+Rel(WarmHouse,bank,"Проводка платежей, печать чеков")
 Rel(WarmHouse,weather,"Fetches outdoor data")
+Rel(WarmHouse,sms,"Отправляет уведомления")
 
 @enduml

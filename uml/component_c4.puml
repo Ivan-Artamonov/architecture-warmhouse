@@ -1,0 +1,43 @@
+@startuml
+!RELATIVE_INCLUDE = 1
+!include ./C4_Component.puml
+
+title WarmHouse Payments Component Diagram
+
+top to bottom direction
+
+Container(Database, "Базы данных и очереди", "PostgreSQL, Redis, RabbitMQ, Kafka", "Хранение информации, кэширование, очереди сообщений")
+
+System_Ext(bank, "Платежная система", "Внешняя платежная система для работы биллинга")
+System_Ext(sms, "API уведомлений", "SMS, push-уведомления")
+
+Container_Boundary(Payments, "Тарификация и биллинг") {
+  Container(PaymentContracts, "Управление договорами", "Java, Spring", "Операции с договорами на обслуживание")
+  Container(PaymentPlans, "Управление тарифами", "Java, Spring", "Операции с тарифами")
+  Container(PaymentUsers, "Услуги и тарифы пользователей", "Java, Spring", "Операции с кортежами: Услуга - Договор")
+  Container(PaymentBilling, "Биллинг", "Java, Spring", "Начисления, счета, чеки")
+}
+
+Container(PaymentBilling, "Тарификация и биллинг", "Java, Spring") {
+  Component(PaymentAPI, "API", "Обработка внешних запросов")
+  Component(PaymentGateWayCallback, "Callback платежной системы", "Обработка результатов платежей")
+  Component(BillingTasks, "Начисления", "Обработчики периодических задач задачи (PG)")
+  Component(ReceiptsQueue, "Чеки", "Обработчик очереди чеков (RabbitMQ)")
+  Component(ServiceLayer, "Service Layer", "Business logic")
+  Component(RepositoryLayer, "Repository Layer", "Data access logic")
+}
+
+Rel(PaymentAPI,ServiceLayer,"Calls business logic")
+Rel(PaymentGateWayCallback,ServiceLayer,"Calls business logic")
+Rel(BillingTasks,ServiceLayer,"Calls business logic")
+Rel(BillingTasks,PaymentUsers,"Получение данных")
+Rel(ReceiptsQueue,ServiceLayer,"Calls business logic")
+Rel(ServiceLayer,RepositoryLayer,"Reads/Writes data")
+Rel(PaymentContracts,Database,"Reads/Writes user data")
+Rel(PaymentPlans,Database,"Reads/Writes user data")
+Rel(PaymentUsers,Database,"Reads/Writes user data")
+Rel(RepositoryLayer,Database,"Reads/Writes user data")
+
+Rel(bank,PaymentGateWayCallback,"Notification")
+Rel(BillingTasks,sms,"Notification")
+@enduml
