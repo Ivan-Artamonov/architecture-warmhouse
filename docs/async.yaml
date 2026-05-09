@@ -1,0 +1,137 @@
+asyncapi: 2.6.0
+
+info:
+  title: WarmHouse Receipt print
+  version: 1.0.0
+  description: |
+    Спецификация асинхронного взаимодействия между "Очередью на печать чеков" (RabbitMQ) и "Worker печати чеков" (Go).
+servers:
+  rabbitmq:
+    url: rabbitmq.warmhouse.internal:5672
+    protocol: amqp
+    description: RabbitMQ брокер очередей печати чеков
+
+defaultContentType: application/json
+
+channels:
+  receipts.print:
+    description: >
+      Очередь задач на печать чеков.
+      Callback API публикует сообщение после успешной оплаты,
+      Worker потребляет сообщения для формирования и отправки чека.
+    bindings:
+      amqp:
+        is: queue
+        queue:
+          name: receipts.print
+          durable: true
+    publish:
+      summary: Callback API отправляет задачу на печать чека
+      operationId: publishReceiptPrint
+      message:
+        $ref: '#/components/messages/receiptPrintRequest'
+    subscribe:
+      summary: Worker забирает задачу на печать чека
+      operationId: consumeReceiptPrint
+      message:
+        $ref: '#/components/messages/receiptPrintRequest'
+
+components:
+  messages:
+    receiptPrintRequest:
+      name: receiptPrintRequest
+      title: Запрос на печать чека
+      summary: Данные для формирования и отправки чека после успешной оплаты
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ReceiptPrintRequest'
+
+  schemas:
+    ReceiptPrintRequest:
+      type: object
+      required:
+        - payment_id
+        - amount
+        - user
+        - ctime
+      properties:
+        payment_id:
+          type: string
+          format: uuid
+          description: Идентификатор платежа
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        invoice_id:
+          type: string
+          description: Платежка
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        amount:
+          $ref: '#/components/schemas/Money'
+        user:
+          $ref: '#/components/schemas/UserInfo'
+        items:
+          type: array
+          description: Перечень позиций в чеке
+          items:
+            $ref: '#/components/schemas/ReceiptItem'
+        receipt_type:
+          type: string
+          enum: [purchase, refund, correction]
+          default: purchase
+          description: Тип операции — покупка, возврат или коррекция
+        ctime:
+          type: string
+          format: date-time
+          description: Время создания платежа
+
+    Money:
+      type: object
+      required: [value, currency]
+      properties:
+        value:
+          type: number
+          format: decimal
+          description: Сумма
+          example: 1500.00
+        currency:
+          type: string
+          description: Код валюты
+          example: "RUB"
+
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: email
+          description: Идентификатор пользователя
+        email:
+          type: string
+          format: email
+          description: Email
+        phone:
+          type: string
+          description: Телефон
+
+    ReceiptItem:
+      type: object
+      required: [name, price, sum]
+      properties:
+        name:
+          type: string
+          description: Наименование
+          example: "Обслуживание автоматизированного котла"
+        quantity:
+          type: integer
+          minimum: 1
+          description: Количество
+          example: 1
+        price:
+          type: number
+          format: decimal
+          description: Цена за единицу
+          example: 1500.00
+        sum:
+          type: number
+          format: double
+          description: Сумма
+          example: 1500.00
