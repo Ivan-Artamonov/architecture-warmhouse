@@ -1,0 +1,37 @@
+@startuml
+!RELATIVE_INCLUDE = 1
+!include ./C4_Container.puml
+
+title WarmHouse Container Diagram
+
+top to bottom direction
+
+Person(user, "Пользователь", "Владелец или жилец дома, подлюченного к системе")
+Person(admin, "Администратор", "Работники Теплого дома с разными правами доступа")
+System(WarmHouse, "Теплый дом", "Экосистема умных поселков")
+
+System_Boundary(WarmHouse, "Теплый дом") {
+  Container(WebApp, "Web Application", "Java, Spring", "Единое окно администрирования")
+  Container(MobileApp, "Мобильное приложение пользователя", "Kotlin, Swift", "Пользователь управляет своим домом")
+  Container(Wiki, "Wiki компании", "Docmost", "Справочная информация о поселках, оборудовании и пр.")
+  Container(Payments, "Тарификация и биллинг", "Java, Spring", "Управление договорами, тарифами, платежами, чеками")
+  Container(Addresses, "Адресная инфраструктура", "Java, Spring", "Информация о поселках и отдельных домах")
+  Container(DevicesRepo, "Управление устройствами", "Java, Spring, JS, HTML", "Мини-аппки устройств, API, телеметрия")
+  Container(ScriptsRepo, "Управление сценариями", "Java, Spring, JS, HTML, Kafka", "Базовыые и кастомные сценарии")
+  Container(ApiGateway, "API-шлюз", "Java, Spring, nginx",  "Авторизует запросы и перенаправляет их к сервисам")
+  Container(Logs, "Журналы", "OpenSearch",  "Чтение и поиск истории")
+  Container(Database, "Базы данных и очереди", "PostgreSQL, Redis, RabbitMQ, Kafka", "Хранение информации, кэширование, очереди сообщений")
+}
+
+Rel(user, MobileApp, "Управляет своим домом")
+Rel(admin,WebApp,"Управляет всей системой")
+Rel(admin,Wiki,"Использует справочную информацию")
+Rel(MobileApp,ApiGateway,  "Передача запросов")
+Rel(WebApp, ApiGateway, "Передача запросов")
+Rel(ApiGateway, Payments, "Передача запросов")
+Rel(ApiGateway, Addresses, "Передача запросов")
+Rel(ApiGateway, DevicesRepo, "Передача запросов")
+Rel(ApiGateway, ScriptsRepo, "Передача запросов")
+Rel(ApiGateway, Logs, "Передача запросов")
+
+@enduml
