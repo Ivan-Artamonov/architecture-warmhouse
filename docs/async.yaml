@@ -1,15 +1,15 @@
 asyncapi: 2.6.0
 
 info:
-  title: WarmHouse Receipt print
+  title: WarmHouse Receipt Print
   version: 1.0.0
   description: |
-    Спецификация асинхронного взаимодействия между "Очередью на печать чеков" (RabbitMQ) и "Worker печати чеков" (Go).
+    Спецификация асинхронного взаимодействия между очередью биллинга (RabbitMQ) и "Worker печати чеков" (Go).
 servers:
   rabbitmq:
     url: rabbitmq.warmhouse.internal:5672
     protocol: amqp
-    description: RabbitMQ брокер очередей печати чеков
+    description: RabbitMQ - брокер биллинга
 
 defaultContentType: application/json
 
@@ -41,7 +41,7 @@ components:
     receiptPrintRequest:
       name: receiptPrintRequest
       title: Запрос на печать чека
-      summary: Данные для формирования и отправки чека после успешной оплаты
+      summary: Данные для формирования чека после успешной оплаты
       contentType: application/json
       payload:
         $ref: '#/components/schemas/ReceiptPrintRequest'
@@ -77,7 +77,7 @@ components:
           type: string
           enum: [purchase, refund, correction]
           default: purchase
-          description: Тип операции — покупка, возврат или коррекция
+          description: Тип операции - покупка, возврат или коррекция
         ctime:
           type: string
           format: date-time
