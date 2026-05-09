@@ -4,8 +4,8 @@ participant "API биллинга" as billing
 participant "Платежная система" as bank
 participant "Callback API" as api
 database "База данных" as db
-queue "Очередь на отправку смс" as sms
 queue "Очередь на печать чеков" as receipts
+participant "Worker печати чеков" as rWorker
 
 
 user -> billing: Запросить платежное окно
@@ -21,13 +21,16 @@ bank -> api: Уведомление о статусе операции
 alt "Оплата успешна"
     api -> db: Сохранить информацию о платеже
     api -> db: Поставить задачу на пересчет задолженности
-    api -> sms: Отправить уведомление пользователю
-    api -> receipts: Напечатать чек
+    api -> receipts: Положить чек в очередь
 
 else "Оплата не удалась"
     api -> db: Пометить платеж неудачным
 end
 
 api -> bank: 200 OK
+
+receipts -> rWorker: Взять чек
+rWorker -> bank: Напечатать чек
+bank -> rWorker: 200 OK
 
 @enduml
