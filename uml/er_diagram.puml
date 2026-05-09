@@ -1,0 +1,153 @@
+@startuml
+
+package "Addresses" {
+    entity "Town" {
+      town_id : number
+      --
+      name: varchar
+    }
+
+    entity "House" {
+      house_id : number
+      --
+      town_id : number
+      address: varchar
+    }
+}
+
+Town  "1" -- "0..*" House
+
+package "Billing" {
+    entity "Receipt" {
+      receipt_id : number
+      --
+      payment_id: varchar
+      url: varchar
+    }
+
+    entity "Payment" {
+      payment_id : varchar
+      --
+      amount: decimal
+      user_id: number
+    }
+
+    entity "Withdraw" {
+      withdraw_id : varchar
+      --
+      amount: decimal
+      user_id: number
+    }
+
+    entity "Plan" {
+      plan_id : number
+      --
+      name: varchar
+      amount: decimal
+      type: enum
+    }
+
+    entity "Service" {
+      service_id : number
+      --
+      name: varchar
+    }
+
+    entity "Contract" {
+      contract_id : number
+      --
+      user_id: number
+    }
+}
+
+entity "User" {
+  user_id : number
+  --
+  username : varchar
+  email : varchar
+  password : varchar
+  user_type: enum
+}
+
+package "DeviceRepo & ScriptRepo" {
+    entity "Device" {
+      device_id : number
+      --
+      house_id: number
+      device_type_id: number
+      name: varchar
+    }
+
+    entity "DeviceType" {
+      device_type_id : number
+      --
+      name: varchar
+    }
+
+    entity "DeviceAction" {
+      device_action_id : number
+      --
+      device_type_id : number
+      name: varchar
+    }
+
+    entity "DeviceEvent" {
+      device_event_id : number
+      --
+      device_type_id : number
+      name: varchar
+      type: enum
+    }
+
+    entity "Firmware" {
+      irmware_id : number
+      --
+      device_type_id : number
+      name: varchar
+      path: varchar
+    }
+
+    entity "Miniapp" {
+      miniapp_id
+      --
+      name: varchar
+      path: varchar
+      version: varchar
+    }
+
+
+    entity "Telemetry" {
+      telemetry_id
+      --
+      name: varchar
+      value: number
+      value_s: varchar
+      ctime: datetime
+    }
+
+    entity "Script" {
+      script_id : number
+      --
+      actions: map
+      start_event: device_event_id
+      type: enum
+    }
+}
+
+Device  "0..*" -- "1" DeviceType
+Device  "1" -- "0..*" DeviceEvent
+Device  "1" -- "0..*" Telemetry
+DeviceType  "1" -- "0..*" Firmware
+DeviceType  "0..*" -- "1" Miniapp
+DeviceType  "1" -- "0..*" DeviceAction
+DeviceEvent  "1" -- "0..*" Script: starts with
+Script  "0..*" -- "0..*" DeviceAction
+
+Plan "*" -- "*" Service
+Receipt "0..1" -- "1" Payment
+Withdraw "0..*" -- "1" Contract
+Payment "0..*" -- "1" Contract
+Plan "1" -- "1" Contract
+
+
+@enduml
