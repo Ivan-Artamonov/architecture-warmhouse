@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-// TemperatureResponse represents the response from the temperature API
 type TemperatureResponse struct {
 	Value       float64   `json:"value"`
 	Unit        string    `json:"unit"`
@@ -22,7 +21,6 @@ type TemperatureResponse struct {
 }
 
 func main() {
-	// Поддержка /temperature?location=...
 	http.HandleFunc("/temperature", func(w http.ResponseWriter, r *http.Request) {
 		location := r.URL.Query().Get("location")
 		if location == "" {
@@ -32,9 +30,7 @@ func main() {
 		sendTemperatureResponse(w, location)
 	})
 
-	// Поддержка /temperature/:location
 	http.HandleFunc("/temperature/", func(w http.ResponseWriter, r *http.Request) {
-		// Извлекаем location из пути: /temperature/Moscow -> Moscow
 		location := strings.TrimPrefix(r.URL.Path, "/temperature/")
 		if location == "" {
 			http.Error(w, "missing location parameter", http.StatusBadRequest)
